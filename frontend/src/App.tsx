@@ -1,0 +1,1929 @@
+import { useState } from 'react';
+import { Button } from './components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card';
+import { Badge } from './components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar';
+import { Input } from './components/ui/input';
+import { Label } from './components/ui/label';
+import { 
+  Bell, 
+  Calendar, 
+  ChevronRight, 
+  Clock, 
+  CreditCard, 
+  MapPin, 
+  Star, 
+  Users, 
+  Wifi,
+  Coffee,
+  Car,
+  Shield,
+  CheckCircle,
+  ArrowRight,
+  User,
+  Settings,
+  LogOut,
+  Zap,
+  Crown,
+  Briefcase,
+  Home,
+  Building2,
+  Network,
+  Wallet,
+  History,
+  TrendingUp,
+  Monitor,
+  UserCheck,
+  MapIcon,
+  ChevronLeft,
+  Play,
+  Phone,
+  Mail,
+  Eye,
+  EyeOff,
+  X,
+  Grid,
+  Check,
+  Info,
+  ArrowLeft,
+  Plus,
+  Minus
+} from 'lucide-react';
+import { ImageWithFallback } from './components/figma/ImageWithFallback';
+
+export default function App() {
+  const [selectedPlan, setSelectedPlan] = useState('');
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
+  const [currentTab, setCurrentTab] = useState('dashboard');
+  const [showBookingPage, setShowBookingPage] = useState(false);
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState('');
+  const [bookingStep, setBookingStep] = useState(1); // 1: Plan, 2: Time, 3: Seats
+  const [selectedBookingPlan, setSelectedBookingPlan] = useState('');
+  const [userInfo, setUserInfo] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    selectedPlan: '',
+    signupDate: new Date(),
+    planStatus: 'inactive' // inactive, active, expired
+  });
+
+  // Service plans based on the image provided
+  const plans = [
+    {
+      name: 'HOT DESK',
+      price: '110,000',
+      period: '/ day',
+      description: 'Flexible workspace solution',
+      features: [
+        'Daily access to shared workspace',
+        'No fixed seating arrangement',
+        'High-speed WiFi included',
+        'Complimentary coffee & tea',
+        'Business hours support'
+      ],
+      icon: <Briefcase className="w-8 h-8 text-yellow-500" />,
+      color: 'bg-slate-900 border-yellow-500 text-white',
+      popular: false
+    },
+    {
+      name: 'FIXED DESK',
+      price: '2.3m',
+      period: '/ month',
+      description: 'Your dedicated workspace',
+      features: [
+        'Reserved desk space',
+        '24/7 access to workspace',
+        'Personal storage locker',
+        'All basic amenities included',
+        'Priority booking for meeting rooms'
+      ],
+      icon: <Monitor className="w-8 h-8 text-yellow-500" />,
+      color: 'bg-slate-900 border-yellow-500 text-white',
+      popular: true
+    },
+    {
+      name: 'PRIVATE OFFICE',
+      price: '7.3m',
+      period: '/ month',
+      description: 'Complete privacy & control',
+      features: [
+        'Fully enclosed private office',
+        'Customizable workspace layout',
+        'Dedicated meeting room access',
+        '24/7 premium support',
+        'VIP concierge services'
+      ],
+      icon: <Building2 className="w-8 h-8 text-yellow-500" />,
+      color: 'bg-slate-900 border-yellow-500 text-white',
+      popular: false
+    },
+    {
+      name: 'APARTMENT',
+      price: '5.7m',
+      period: '/ month',
+      description: 'Live & work in comfort',
+      features: [
+        'Fully furnished apartment',
+        'Kitchen & living area included',
+        'Work-life balance setup',
+        'Premium residential amenities',
+        'Flexible lease terms'
+      ],
+      icon: <Home className="w-8 h-8 text-yellow-500" />,
+      color: 'bg-slate-900 border-yellow-500 text-white',
+      popular: false
+    },
+    {
+      name: 'NETWORKING SPACE',
+      price: '300,000',
+      period: '/ hour',
+      description: 'Connect & collaborate',
+      features: [
+        'Large networking event space',
+        'Professional AV equipment',
+        'Catering services available',
+        'Event planning support',
+        'Flexible booking options'
+      ],
+      icon: <Network className="w-8 h-8 text-yellow-500" />,
+      color: 'bg-slate-900 border-yellow-500 text-white',
+      popular: false
+    },
+    {
+      name: 'VIRTUAL OFFICE',
+      price: '1m',
+      period: '/ month',
+      description: 'Professional business address',
+      features: [
+        'Premium business address',
+        'Mail handling & forwarding',
+        'Professional receptionist service',
+        'Meeting room access on demand',
+        'Call forwarding services'
+      ],
+      icon: <UserCheck className="w-8 h-8 text-yellow-500" />,
+      color: 'bg-slate-900 border-yellow-500 text-white',
+      popular: false
+    }
+  ];
+
+  // Benefits/Features
+  const benefits = [
+    {
+      icon: <Wifi className="w-8 h-8" />,
+      title: 'High-Speed WiFi',
+      description: 'Reliable 100Mbps internet connection, perfect for everything from video calls to large file uploads.',
+      color: 'text-blue-600'
+    },
+    {
+      icon: <Coffee className="w-8 h-8" />,
+      title: 'Complimentary Beverages',
+      description: 'Enjoy unlimited coffee, tea, and refreshments throughout the day to keep your energy up.',
+      color: 'text-orange-600'
+    },
+    {
+      icon: <Users className="w-8 h-8" />,
+      title: 'Professional Community',
+      description: 'Network with 500+ members from diverse industries and expand your professional connections.',
+      color: 'text-green-600'
+    },
+    {
+      icon: <Shield className="w-8 h-8" />,
+      title: '24/7 Security',
+      description: 'State-of-the-art security system with keycard access and surveillance for complete peace of mind.',
+      color: 'text-purple-600'
+    },
+    {
+      icon: <Car className="w-8 h-8" />,
+      title: 'Free Parking',
+      description: 'Spacious and secure parking area available at no extra cost for your daily convenience.',
+      color: 'text-cyan-600'
+    },
+    {
+      icon: <Clock className="w-8 h-8" />,
+      title: 'Always Open',
+      description: 'Work on your schedule with 24/7 access, perfect for any work routine or deadline.',
+      color: 'text-red-600'
+    }
+  ];
+
+  // Customer reviews
+  const reviews = [
+    {
+      name: 'Sarah Chen',
+      position: 'UI/UX Designer',
+      avatar: 'SC',
+      rating: 5,
+      comment: 'Amazing workspace! Very quiet and professional environment. My productivity has increased significantly since joining Enosta Space.',
+      color: 'bg-pink-100 text-pink-700'
+    },
+    {
+      name: 'Michael Johnson',
+      position: 'Software Developer',
+      avatar: 'MJ',
+      rating: 5,
+      comment: 'Excellent support team and full amenities. Super fast WiFi, perfect for coding and online meetings. Highly recommend!',
+      color: 'bg-blue-100 text-blue-700'
+    },
+    {
+      name: 'Emily Rodriguez',
+      position: 'Marketing Manager',
+      avatar: 'ER',
+      rating: 5,
+      comment: 'Great value and convenient location. The community here is very friendly - I\'ve made connections and found collaboration opportunities.',
+      color: 'bg-green-100 text-green-700'
+    }
+  ];
+
+  const handleSelectPlan = (planName: string) => {
+    setSelectedPlan(planName);
+    setShowSignupModal(true);
+  };
+
+  const handleSignup = (formData: any) => {
+    // Simulate successful signup
+    setUserInfo({
+      firstName: formData.firstName || 'User',
+      lastName: formData.lastName || '',
+      email: formData.email || '',
+      phone: formData.phone || '',
+      selectedPlan: selectedPlan,
+      signupDate: new Date(),
+      planStatus: 'inactive'
+    });
+    setIsAuthenticated(true);
+    setShowSignupModal(false);
+    setShowWelcome(true);
+  };
+
+  const goToDashboard = () => {
+    setShowWelcome(false);
+    setShowDashboard(true);
+  };
+
+  const goToLanding = () => {
+    setShowDashboard(false);
+    setShowWelcome(false);
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    setShowDashboard(false);
+    setShowWelcome(false);
+    setUserInfo({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      selectedPlan: '',
+      signupDate: new Date(),
+      planStatus: 'inactive'
+    });
+  };
+
+  // Welcome Screen Component
+  const WelcomeScreen = () => {
+    const selectedPlanDetails = plans.find(p => p.name === userInfo.selectedPlan);
+    
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-2xl bg-white border border-gray-200 shadow-xl">
+          <CardHeader className="text-center space-y-4 pb-6">
+            <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center animate-pulse" style={{ backgroundColor: '#22D3EE' }}>
+              <CheckCircle className="w-10 h-10 text-white" />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-3xl text-gray-900">Welcome to Enosta Space!</h1>
+              <p className="text-lg text-gray-600">
+                Congratulations {userInfo.firstName}! Your account has been created successfully.
+              </p>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-8">
+            {selectedPlanDetails && (
+              <div className="p-6 rounded-xl border-2 border-orange-200 bg-orange-50">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900">Your Selected Plan</h3>
+                  <Badge className="text-white" style={{ backgroundColor: '#F59E0B' }}>
+                    {selectedPlanDetails.name}
+                  </Badge>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <div className="flex items-center space-x-3 mb-3">
+                      {selectedPlanDetails.icon}
+                      <span className="font-semibold text-gray-900">{selectedPlanDetails.name}</span>
+                    </div>
+                    <p className="text-gray-600 text-sm mb-4">{selectedPlanDetails.description}</p>
+                    <div className="flex items-baseline">
+                      <span className="text-2xl font-bold text-gray-900">VND {selectedPlanDetails.price}</span>
+                      <span className="text-gray-500 ml-1">{selectedPlanDetails.period}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-gray-900">Plan Features:</h4>
+                    <ul className="space-y-1">
+                      {selectedPlanDetails.features.slice(0, 3).map((feature, index) => (
+                        <li key={index} className="flex items-center space-x-2 text-sm text-gray-600">
+                          <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900">What's Next?</h3>
+              <div className="grid gap-3">
+                <div className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                  <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-semibold">1</div>
+                  <span className="text-gray-700">Check out your dashboard and explore available spaces</span>
+                </div>
+                <div className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                  <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-semibold">2</div>
+                  <span className="text-gray-700">Book your first workspace and complete payment</span>
+                </div>
+                <div className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                  <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-semibold">3</div>
+                  <span className="text-gray-700">Receive your QR code for easy check-in access</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-6">
+              <Button 
+                size="lg" 
+                className="flex-1 text-white border-0 h-12 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                style={{ backgroundColor: '#F59E0B' }}
+                onClick={goToDashboard}
+              >
+                Continue to Dashboard
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 h-12 transition-all duration-200"
+                onClick={goToDashboard}
+              >
+                Explore Services
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
+  // Dashboard Component
+  const Dashboard = () => {
+    const selectedPlanDetails = plans.find(p => p.name === userInfo.selectedPlan);
+    const daysUntilExpiry = 30; // Mock data
+    
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Dashboard Header */}
+        <div className="bg-white border-b sticky top-16 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center space-x-4">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={goToLanding}
+                  className="hover:bg-gray-100"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
+                <h1 className="text-xl text-gray-900">My Dashboard</h1>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Badge variant="outline" className="text-green-600 border-green-600">
+                  {userInfo.planStatus === 'active' ? 'Active' : 'Inactive'}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid lg:grid-cols-3 gap-8">
+            
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-8">
+              
+              {/* Welcome Section */}
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-4">
+                    <Avatar className="w-12 h-12">
+                      <AvatarFallback className="bg-blue-100 text-blue-700">
+                        {userInfo.firstName.charAt(0)}{userInfo.lastName.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h2 className="text-xl text-gray-900">
+                        Welcome back, {userInfo.firstName}!
+                      </h2>
+                      <p className="text-gray-600">
+                        Ready to make the most of your workspace today?
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Onboarding Guide */}
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Zap className="w-5 h-5 text-orange-500" />
+                    <span>Getting Started Guide</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Follow these simple steps to start using your workspace
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-4 p-4 rounded-lg border border-gray-200 hover:border-orange-300 transition-colors cursor-pointer">
+                      <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-semibold">
+                        1
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900">Book Your Space</h3>
+                        <p className="text-sm text-gray-600">View floor plan and select your preferred workspace</p>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                        onClick={() => {
+                          setCurrentTab('booking');
+                          setShowBookingPage(true);
+                        }}
+                      >
+                        View Floor Plan
+                        <MapIcon className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
+                    
+                    <div className="flex items-center space-x-4 p-4 rounded-lg border border-gray-200 hover:border-orange-300 transition-colors cursor-pointer opacity-60">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center font-semibold">
+                        2
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900">Complete Payment</h3>
+                        <p className="text-sm text-gray-600">Secure payment processing and plan confirmation</p>
+                      </div>
+                      <Button size="sm" variant="outline" disabled className="border-gray-300 text-gray-500">
+                        Payment
+                        <CreditCard className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
+                    
+                    <div className="flex items-center space-x-4 p-4 rounded-lg border border-gray-200 opacity-60">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center font-semibold">
+                        3
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900">Get QR Check-in</h3>
+                        <p className="text-sm text-gray-600">Receive your personalized QR code for building access</p>
+                      </div>
+                      <Button size="sm" variant="outline" disabled className="border-gray-300 text-gray-500">
+                        QR Code
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Activity History */}
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <History className="w-5 h-5 text-blue-500" />
+                    <span>Recent Activity</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                      <Calendar className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Activity Yet</h3>
+                    <p className="text-gray-600 mb-4">
+                      Your workspace bookings and activities will appear here once you start using the service.
+                    </p>
+                    <Button 
+                      className="text-white"
+                      style={{ backgroundColor: '#F59E0B' }}
+                      onClick={() => {
+                        setCurrentTab('booking');
+                        setShowBookingPage(true);
+                      }}
+                    >
+                      Book Your First Space
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              
+              {/* Plan Information */}
+              {selectedPlanDetails && (
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Crown className="w-5 h-5 text-yellow-500" />
+                      <span>Current Plan</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-3">
+                      {selectedPlanDetails.icon}
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{selectedPlanDetails.name}</h3>
+                        <p className="text-sm text-gray-600">{selectedPlanDetails.description}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Status</span>
+                        <Badge 
+                          variant={userInfo.planStatus === 'active' ? 'default' : 'secondary'}
+                          className={userInfo.planStatus === 'active' ? 'bg-green-500' : ''}
+                        >
+                          {userInfo.planStatus === 'active' ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Price</span>
+                        <span className="text-sm font-medium">VND {selectedPlanDetails.price}{selectedPlanDetails.period}</span>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Expires in</span>
+                        <span className="text-sm font-medium text-orange-600">{daysUntilExpiry} days</span>
+                      </div>
+                    </div>
+                    
+                    <Button size="sm" variant="outline" className="w-full border-orange-300 text-orange-600 hover:bg-orange-50">
+                      Activate Plan
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Upgrade Suggestions */}
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <TrendingUp className="w-5 h-5 text-green-500" />
+                    <span>Recommendations</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Building2 className="w-4 h-4 text-blue-600" />
+                      <span className="font-medium text-blue-900">Private Office</span>
+                    </div>
+                    <p className="text-sm text-blue-700 mb-3">
+                      Upgrade for complete privacy and dedicated space.
+                    </p>
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                      Learn More
+                    </Button>
+                  </div>
+                  
+                  <div className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Network className="w-4 h-4 text-purple-600" />
+                      <span className="font-medium text-purple-900">Networking Events</span>
+                    </div>
+                    <p className="text-sm text-purple-700 mb-3">
+                      Join exclusive networking sessions with industry leaders.
+                    </p>
+                    <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
+                      View Events
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start" size="sm">
+                    <Phone className="w-4 h-4 mr-2" />
+                    Contact Support
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" size="sm">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Account Settings
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" size="sm">
+                    <Bell className="w-4 h-4 mr-2" />
+                    Notifications
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Bottom Navigation Component
+  const BottomNavigation = () => {
+    const navItems = [
+      { id: 'dashboard', label: 'Dashboard', icon: Home, color: '#1E3A8A' },
+      { id: 'booking', label: 'Booking', icon: Grid3X3, color: '#22D3EE' },
+      { id: 'plans', label: 'Plans', icon: Crown, color: '#F59E0B' },
+      { id: 'payment', label: 'Payment', icon: CreditCard, color: '#10B981' },
+      { id: 'profile', label: 'Profile', icon: User, color: '#8B5CF6' }
+    ];
+
+    return (
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50">
+        <div className="grid grid-cols-5 max-w-md mx-auto">
+          {navItems.map((item) => {
+            const isActive = currentTab === item.id;
+            const IconComponent = item.icon;
+            
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setCurrentTab(item.id);
+                  if (item.id === 'booking') {
+                    setShowBookingPage(true);
+                    setBookingStep(1);
+                    setSelectedBookingPlan('');
+                    setSelectedSeats([]);
+                    setSelectedTimeSlot('');
+                  } else {
+                    setShowBookingPage(false);
+                  }
+                }}
+                className={`flex flex-col items-center py-3 px-2 transition-all duration-200 ${
+                  isActive ? 'transform -translate-y-1' : 'hover:bg-gray-50'
+                }`}
+              >
+                <div 
+                  className={`p-2 rounded-xl transition-all duration-200 ${
+                    isActive ? 'shadow-lg' : ''
+                  }`}
+                  style={{ 
+                    backgroundColor: isActive ? item.color : 'transparent',
+                  }}
+                >
+                  <IconComponent 
+                    className={`w-5 h-5 ${
+                      isActive ? 'text-white' : 'text-gray-500'
+                    }`} 
+                  />
+                </div>
+                <span className={`text-xs mt-1 ${
+                  isActive ? 'text-gray-900 font-medium' : 'text-gray-500'
+                }`}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Seat Map Component
+  const SeatMap = () => {
+    // Generate seat layout (similar to cinema)
+    const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    const seatsPerRow = 10;
+    
+    // Mock occupied seats
+    const occupiedSeats = ['A3', 'A4', 'B5', 'B6', 'C2', 'D8', 'E1', 'F7', 'G9', 'H3'];
+    const premiumSeats = ['D4', 'D5', 'D6', 'D7', 'E4', 'E5', 'E6', 'E7']; // VIP area
+
+    const getSeatStatus = (seatId: string) => {
+      if (selectedSeats.includes(seatId)) return 'selected';
+      if (occupiedSeats.includes(seatId)) return 'occupied';
+      if (premiumSeats.includes(seatId)) return 'premium';
+      return 'available';
+    };
+
+    const getSeatColor = (status: string) => {
+      switch (status) {
+        case 'selected': return '#F59E0B';
+        case 'occupied': return '#9CA3AF';
+        case 'premium': return '#EAB308';
+        case 'available': return '#22D3EE';
+        default: return '#E5E7EB';
+      }
+    };
+
+    const handleSeatClick = (seatId: string) => {
+      const status = getSeatStatus(seatId);
+      if (status === 'occupied') return;
+      
+      setSelectedSeats(prev => {
+        if (prev.includes(seatId)) {
+          return prev.filter(id => id !== seatId);
+        } else {
+          return [...prev, seatId];
+        }
+      });
+    };
+
+    return (
+      <div className="space-y-6">
+        {/* Legend */}
+        <div className="flex justify-center space-x-4 text-xs">
+          <div className="flex items-center space-x-1">
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#22D3EE' }}></div>
+            <span>Available</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#EAB308' }}></div>
+            <span>Premium</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#F59E0B' }}></div>
+            <span>Selected</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#9CA3AF' }}></div>
+            <span>Occupied</span>
+          </div>
+        </div>
+
+        {/* Screen/Front indicator */}
+        <div className="text-center">
+          <div className="inline-block px-6 py-2 bg-gray-800 text-white rounded-full text-sm">
+            ENTRANCE
+          </div>
+        </div>
+
+        {/* Seat Grid */}
+        <div className="space-y-3 overflow-x-auto px-4">
+          {rows.map((row) => (
+            <div key={row} className="flex items-center justify-center space-x-2">
+              <div className="w-8 text-center text-sm font-medium text-gray-600">
+                {row}
+              </div>
+              <div className="flex space-x-1">
+                {Array.from({ length: seatsPerRow }, (_, index) => {
+                  const seatNumber = index + 1;
+                  const seatId = `${row}${seatNumber}`;
+                  const status = getSeatStatus(seatId);
+                  const isClickable = status !== 'occupied';
+                  
+                  return (
+                    <button
+                      key={seatId}
+                      onClick={() => handleSeatClick(seatId)}
+                      disabled={!isClickable}
+                      className={`w-8 h-8 rounded-lg border-2 text-xs font-medium transition-all duration-200 ${
+                        isClickable 
+                          ? 'hover:scale-110 hover:shadow-md cursor-pointer' 
+                          : 'cursor-not-allowed opacity-60'
+                      } ${
+                        status === 'selected' 
+                          ? 'border-orange-600 text-white transform scale-110 shadow-lg' 
+                          : 'border-gray-300 text-gray-700'
+                      }`}
+                      style={{ 
+                        backgroundColor: getSeatColor(status),
+                        color: status === 'available' || status === 'premium' ? '#374151' : 'white'
+                      }}
+                    >
+                      {seatNumber}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="w-8 text-center text-sm font-medium text-gray-600">
+                {row}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Aisle indicator */}
+        <div className="text-center">
+          <div className="inline-block px-6 py-2 bg-gray-100 text-gray-600 rounded-full text-sm">
+            RECEPTION AREA
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Booking Page Component
+  const BookingPage = () => {
+    const timeSlots = [
+      '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', 
+      '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'
+    ];
+
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('en-US', { 
+        weekday: 'short', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    };
+
+    const getDatesArray = () => {
+      const dates = [];
+      for (let i = 0; i < 7; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() + i);
+        dates.push(date);
+      }
+      return dates;
+    };
+
+    const getSelectedPlanDetails = () => {
+      return plans.find(p => p.name === selectedBookingPlan);
+    };
+
+    const calculatePlanPrice = (): number => {
+  const planDetails = getSelectedPlanDetails();
+  if (!planDetails) return 0;
+
+  // Convert price string to number (remove commas and handle 'm' for millions)
+  const priceStr = planDetails.price.replace(/,/g, '');
+  let price: number;
+
+  if (priceStr.includes('m')) {
+    price = parseFloat(priceStr.replace('m', '')) * 1000000;
+  } else {
+    price = parseFloat(priceStr);
+  }
+
+  return price;
+};
+
+const calculateTotal = (): number => {
+  const planPrice = calculatePlanPrice();
+  return planPrice * selectedSeats.length;
+};
+
+    const handleBackStep = () => {
+      if (bookingStep > 1) {
+        setBookingStep(bookingStep - 1);
+      } else {
+        setShowBookingPage(false);
+        setBookingStep(1);
+        setSelectedBookingPlan('');
+        setSelectedSeats([]);
+        setSelectedTimeSlot('');
+      }
+    };
+
+    const handleNextStep = () => {
+      if (bookingStep < 3) {
+        setBookingStep(bookingStep + 1);
+      }
+    };
+
+    const getStepTitle = () => {
+      switch (bookingStep) {
+        case 1: return 'Choose Your Plan';
+        case 2: return 'Select Date & Time';
+        case 3: return 'Choose Your Seats';
+        default: return 'Book Your Space';
+      }
+    };
+
+    const canProceedToNextStep = () => {
+      switch (bookingStep) {
+        case 1: return selectedBookingPlan !== '';
+        case 2: return selectedTimeSlot !== '';
+        case 3: return selectedSeats.length > 0;
+        default: return false;
+      }
+    };
+
+    return (
+      <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="bg-white border-b sticky top-0 z-40">
+          <div className="max-w-md mx-auto px-4">
+            <div className="flex items-center justify-between h-14">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={handleBackStep}
+                className="hover:bg-gray-100"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <h1 className="text-lg font-medium">{getStepTitle()}</h1>
+              <div className="w-10"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress Indicator */}
+        <div className="max-w-md mx-auto px-4 py-4">
+          <div className="flex items-center justify-center space-x-4">
+            {[1, 2, 3].map((step) => (
+              <div key={step} className="flex items-center">
+                <div 
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 ${
+                    step <= bookingStep 
+                      ? 'bg-orange-500 text-white' 
+                      : 'bg-gray-200 text-gray-500'
+                  }`}
+                >
+                  {step < bookingStep ? <Check className="w-4 h-4" /> : step}
+                </div>
+                {step < 3 && (
+                  <div 
+                    className={`w-8 h-1 mx-2 rounded transition-all duration-200 ${
+                      step < bookingStep ? 'bg-orange-500' : 'bg-gray-200'
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-between text-xs text-gray-500 mt-2">
+            <span>Plan</span>
+            <span>Time</span>
+            <span>Seats</span>
+          </div>
+        </div>
+
+        <div className="max-w-md mx-auto px-4 py-6 space-y-6">
+          {/* Step 1: Plan Selection */}
+          {bookingStep === 1 && (
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center space-x-2">
+                  <Crown className="w-5 h-5 text-yellow-500" />
+                  <span>Select Service Plan</span>
+                </CardTitle>
+                <CardDescription>
+                  Choose the plan that best fits your needs
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {plans.map((plan, index) => (
+                  <div
+                    key={index}
+                    onClick={() => setSelectedBookingPlan(plan.name)}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:shadow-md ${
+                      selectedBookingPlan === plan.name
+                        ? 'border-orange-500 bg-orange-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        {plan.icon}
+                        <div>
+                          <h3 className="font-medium text-gray-900">{plan.name}</h3>
+                          <p className="text-sm text-gray-600">{plan.description}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold text-gray-900">VND {plan.price}</div>
+                        <div className="text-sm text-gray-500">{plan.period}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-xs text-gray-600">
+                      <div className="flex items-center space-x-1 mb-1">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        <span>{plan.features[0]}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        <span>{plan.features[1]}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 2: Date & Time Selection */}
+          {bookingStep === 2 && (
+            <>
+              {/* Date Selection */}
+              <Card className="border-0 shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center space-x-2">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                    <span>Select Date</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex space-x-2 overflow-x-auto pb-2">
+                    {getDatesArray().map((date, index) => {
+                      const isSelected = selectedDate.toDateString() === date.toDateString();
+                      const isToday = index === 0;
+                      
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => setSelectedDate(date)}
+                          className={`flex-shrink-0 px-4 py-3 rounded-xl border-2 text-center min-w-20 transition-all duration-200 ${
+                            isSelected 
+                              ? 'border-orange-500 bg-orange-50 text-orange-700' 
+                              : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                          }`}
+                        >
+                          <div className="text-xs font-medium">
+                            {isToday ? 'Today' : formatDate(date).split(' ')[0]}
+                          </div>
+                          <div className="text-lg font-bold mt-1">
+                            {date.getDate()}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Time Slot Selection */}
+              <Card className="border-0 shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center space-x-2">
+                    <Clock className="w-5 h-5 text-green-600" />
+                    <span>Select Time Slot</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-2">
+                    {timeSlots.map((time) => (
+                      <button
+                        key={time}
+                        onClick={() => setSelectedTimeSlot(time)}
+                        className={`py-3 px-2 rounded-lg border-2 text-sm font-medium transition-all duration-200 ${
+                          selectedTimeSlot === time
+                            ? 'border-green-500 bg-green-50 text-green-700'
+                            : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                        }`}
+                      >
+                        {time}
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Selected Plan Summary */}
+              {selectedBookingPlan && (
+                <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        {getSelectedPlanDetails()?.icon}
+                        <div>
+                          <div className="font-medium text-gray-900">{selectedBookingPlan}</div>
+                          <div className="text-sm text-gray-600">VND {getSelectedPlanDetails()?.price}{getSelectedPlanDetails()?.period}</div>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setBookingStep(1)}
+                        className="text-blue-600 hover:bg-blue-100"
+                      >
+                        Change
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+
+          {/* Step 3: Seat Selection */}
+          {bookingStep === 3 && (
+            <>
+              {/* Seat Selection */}
+              <Card className="border-0 shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Grid3X3 className="w-5 h-5 text-purple-600" />
+                      <span>Choose Your Seats</span>
+                    </div>
+                    <Badge variant="outline" className="text-purple-600 border-purple-300">
+                      {selectedSeats.length} selected
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <SeatMap />
+                </CardContent>
+              </Card>
+
+              {/* Booking Summary */}
+              {selectedSeats.length > 0 && (
+                <Card className="border-0 shadow-sm bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-900">Selected Plan</span>
+                        <span className="text-orange-600 font-medium">
+                          {selectedBookingPlan}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-900">Selected Seats</span>
+                        <span className="text-orange-600 font-medium">
+                          {selectedSeats.join(', ')}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-900">Date & Time</span>
+                        <div className="text-right">
+                          <div className="text-gray-700">{formatDate(selectedDate)}</div>
+                          <div className="text-sm text-gray-500">{selectedTimeSlot}</div>
+                        </div>
+                      </div>
+                      
+                      <div className="border-t border-orange-200 pt-3">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-gray-900">Total Amount</span>
+                          <span className="text-xl font-bold text-orange-600">
+                            VND {calculateTotal().toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {selectedSeats.length} seat(s) × VND {calculatePlanPrice().toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Fixed Bottom Navigation */}
+        <div className="fixed bottom-20 left-0 right-0 p-4 bg-white border-t">
+          <div className="max-w-md mx-auto">
+            {bookingStep < 3 ? (
+              <Button 
+                className="w-full h-12 text-white font-medium"
+                style={{ backgroundColor: '#F59E0B' }}
+                onClick={handleNextStep}
+                disabled={!canProceedToNextStep()}
+              >
+                Continue to {bookingStep === 1 ? 'Date & Time' : 'Seat Selection'}
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            ) : (
+              selectedSeats.length > 0 && selectedTimeSlot && (
+                <Button 
+                  className="w-full h-12 text-white font-medium"
+                  style={{ backgroundColor: '#F59E0B' }}
+                  onClick={() => {
+                    // Handle booking confirmation
+                    alert(`Booking confirmed!\nPlan: ${selectedBookingPlan}\nSeats: ${selectedSeats.join(', ')}\nDate: ${formatDate(selectedDate)}\nTime: ${selectedTimeSlot}\nTotal: VND ${calculateTotal().toLocaleString()}`);
+                    // Reset booking state
+                    setBookingStep(1);
+                    setSelectedBookingPlan('');
+                    setSelectedSeats([]);
+                    setSelectedTimeSlot('');
+                    setShowBookingPage(false);
+                  }}
+                >
+                  <Check className="w-5 h-5 mr-2" />
+                  Confirm Booking - VND {calculateTotal().toLocaleString()}
+                </Button>
+              )
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Modified Dashboard with bottom navigation
+  const DashboardWithNav = () => {
+    const selectedPlanDetails = plans.find(p => p.name === userInfo.selectedPlan);
+    const daysUntilExpiry = 30;
+    
+    return (
+      <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="bg-white border-b sticky top-0 z-40">
+          <div className="max-w-md mx-auto px-4">
+            <div className="flex items-center justify-between h-14">
+              <h1 className="text-lg font-medium">Dashboard</h1>
+              <div className="flex items-center space-x-2">
+                <Button variant="ghost" size="icon" className="hover:bg-gray-100">
+                  <Bell className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-md mx-auto px-4 py-6 space-y-6">
+          {/* Welcome Card */}
+          <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-cyan-50">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <Avatar className="w-12 h-12">
+                  <AvatarFallback className="bg-blue-500 text-white">
+                    {userInfo.firstName.charAt(0)}{userInfo.lastName.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h2 className="font-medium text-gray-900">
+                    Welcome back, {userInfo.firstName}!
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    Ready to book your workspace?
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Action */}
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <Button
+                className="w-full h-12 text-white"
+                style={{ backgroundColor: '#F59E0B' }}
+                onClick={() => {
+                  setCurrentTab('booking');
+                  setShowBookingPage(true);
+                  setBookingStep(1);
+                  setSelectedBookingPlan('');
+                  setSelectedSeats([]);
+                  setSelectedTimeSlot('');
+                }}
+              >
+                <Grid3X3 className="w-5 h-5 mr-2" />
+                Book Your Space Now
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Current Plan */}
+          {selectedPlanDetails && (
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center space-x-2">
+                  <Crown className="w-5 h-5 text-yellow-500" />
+                  <span>Current Plan</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    {selectedPlanDetails.icon}
+                    <span className="font-medium">{selectedPlanDetails.name}</span>
+                  </div>
+                  <Badge className={userInfo.planStatus === 'active' ? 'bg-green-500' : ''}>
+                    {userInfo.planStatus === 'active' ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+                <div className="text-sm text-gray-600">
+                  VND {selectedPlanDetails.price}{selectedPlanDetails.period}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Recent Activity */}
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center space-x-2">
+                <History className="w-5 h-5 text-green-500" />
+                <span>Recent Activity</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-gray-400" />
+                </div>
+                <p className="text-sm text-gray-600 mb-3">
+                  No bookings yet
+                </p>
+                <Button 
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setCurrentTab('booking');
+                    setShowBookingPage(true);
+                    setBookingStep(1);
+                    setSelectedBookingPlan('');
+                    setSelectedSeats([]);
+                    setSelectedTimeSlot('');
+                  }}
+                >
+                  Make Your First Booking
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <BottomNavigation />
+      </div>
+    );
+  };
+
+  // Conditional rendering based on app state
+  if (showWelcome) {
+    return <WelcomeScreen />;
+  }
+
+  if (showDashboard) {
+    return <DashboardWithNav />;
+  }
+
+  if (showBookingPage) {
+    return <BookingPage />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white/95 backdrop-blur-sm shadow-sm border-b sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1E3A8A' }}>
+                <span className="text-white text-lg">ES</span>
+              </div>
+              <h1 className="text-xl text-gray-900">Enosta Space</h1>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" className="hidden sm:flex hover:bg-gray-100 transition-colors">
+                <Phone className="w-4 h-4 mr-2" />
+                Contact
+              </Button>
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm text-gray-600 hidden sm:block">
+                    Hello, {userInfo.firstName}
+                  </span>
+                  <Button 
+                    variant="ghost"
+                    onClick={() => setShowDashboard(true)}
+                    className="hover:bg-gray-100 transition-colors"
+                  >
+                    Dashboard
+                  </Button>
+                  <Button 
+                    variant="ghost"
+                    onClick={logout}
+                    className="hover:bg-gray-100 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button 
+                  className="text-white hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                  style={{ backgroundColor: '#F59E0B' }}
+                  onClick={() => setShowSignupModal(true)}
+                >
+                  Get Started
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1E3A8A 0%, #22D3EE 100%)' }}>
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8 text-white">
+              <div className="space-y-4">
+                <Badge className="bg-white/20 text-white border-0 inline-flex animate-pulse">
+                  ✨ Grand Opening Special Offer
+                </Badge>
+                <h1 className="text-4xl lg:text-6xl leading-tight">
+                  Modern & Flexible
+                  <br />
+                  <span style={{ color: '#22D3EE' }}>Workspace Solutions</span>
+                </h1>
+                <p className="text-xl text-blue-100 leading-relaxed">
+                  Join a community of 500+ professionals working at Enosta Space. 
+                  Professional environment, complete amenities, unlimited connections.
+                </p>
+              </div>
+              
+              <div className="flex justify-center sm:justify-start">
+                <Button 
+                  size="lg" 
+                  className="text-white border-0 px-8 text-lg h-14 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  style={{ backgroundColor: '#F59E0B' }}
+                  onClick={() => setShowSignupModal(true)}
+                >
+                  Choose Your Plan
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-8 pt-8 border-t border-white/20">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">500+</div>
+                  <div className="text-sm text-blue-200">Members</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">24/7</div>
+                  <div className="text-sm text-blue-200">Access</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">100%</div>
+                  <div className="text-sm text-blue-200">Satisfaction</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="aspect-square rounded-xl overflow-hidden">
+                    <ImageWithFallback 
+                      src="https://images.unsplash.com/photo-1748346918817-0b1b6b2f9bab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBjb3dvcmtpbmclMjBzcGFjZSUyMHBlb3BsZSUyMHdvcmtpbmd8ZW58MXx8fHwxNzU4Mjg5ODU4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                      alt="Coworking space"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="aspect-video rounded-xl overflow-hidden">
+                    <ImageWithFallback 
+                      src="https://images.unsplash.com/photo-1700168333952-3d44a3f427af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvZmZpY2UlMjB3b3Jrc3BhY2UlMjBicmlnaHQlMjBuYXR1cmFsJTIwbGlnaHR8ZW58MXx8fHwxNzU4Mjg5ODYxfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                      alt="Office workspace"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="mt-8">
+                  <div className="aspect-[3/4] rounded-xl overflow-hidden">
+                    <ImageWithFallback 
+                      src="https://images.unsplash.com/photo-1559310278-18a9192d909f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3dvcmtpbmclMjBzcGFjZSUyMGludGVyaW9yJTIwZGVzaWdufGVufDF8fHx8MTc1ODI4OTg2NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                      alt="Coworking interior"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-16 lg:py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-3xl lg:text-4xl text-gray-900">
+              Why Choose Enosta Space?
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              We provide everything you need to work efficiently and grow your career
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {benefits.map((benefit, index) => (
+              <Card key={index} className="border-0 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
+                <CardContent className="p-8 text-center space-y-4">
+                  <div className={`w-16 h-16 mx-auto rounded-xl bg-gray-50 flex items-center justify-center ${benefit.color} group-hover:scale-110 transition-transform duration-300`}>
+                    {benefit.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">{benefit.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{benefit.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-16 lg:py-24 bg-white/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-3xl lg:text-4xl text-gray-900">
+              Choose Your Perfect Plan
+            </h2>
+            <p className="text-xl text-gray-600">
+              Flexible upgrades and downgrades anytime to fit your needs
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+            {plans.map((plan, index) => (
+              <Card 
+                key={index}
+                className={`relative border-2 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 group ${
+                  plan.popular 
+                    ? 'border-yellow-500 shadow-lg scale-105' 
+                    : 'border-yellow-500/30 hover:border-yellow-500'
+                } ${plan.color}`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                    <Badge className="text-black border-0 px-6 animate-pulse" style={{ backgroundColor: '#F59E0B' }}>
+                      Most Popular
+                    </Badge>
+                  </div>
+                )}
+                
+                <CardHeader className="text-center pb-6">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-black/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    {plan.icon}
+                  </div>
+                  <CardTitle className="text-xl text-yellow-500 font-bold">{plan.name}</CardTitle>
+                  <CardDescription className="text-gray-300 text-base">{plan.description}</CardDescription>
+                  <div className="space-y-1 pt-4">
+                    <p className="text-sm text-gray-400">Starting at</p>
+                    <div className="flex items-baseline justify-center">
+                      <span className="text-2xl text-white">VND </span>
+                      <span className="text-3xl text-white font-bold">{plan.price}</span>
+                      <span className="text-gray-300 ml-1">{plan.period}</span>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="space-y-6">
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center space-x-3">
+                        <CheckCircle className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+                        <span className="text-gray-300 text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <Button 
+                    className="w-full h-12 text-base border border-yellow-500 bg-transparent text-yellow-500 hover:bg-yellow-500 hover:text-black transition-all duration-200 hover:shadow-lg"
+                    onClick={() => handleSelectPlan(plan.name)}
+                  >
+                    Read More
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Reviews Section */}
+      <section className="py-16 lg:py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-3xl lg:text-4xl text-gray-900">
+              What Our Members Say
+            </h2>
+            <p className="text-xl text-gray-600">
+              Real experiences from the Enosta Space community
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {reviews.map((review, index) => (
+              <Card key={index} className="border-0 shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                <CardContent className="p-8 space-y-6">
+                  <div className="flex items-center space-x-1">
+                    {[...Array(review.rating)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  
+                  <p className="text-gray-700 leading-relaxed italic">
+                    "{review.comment}"
+                  </p>
+                  
+                  <div className="flex items-center space-x-4">
+                    <Avatar className="w-12 h-12">
+                      <AvatarFallback className={review.color}>
+                        {review.avatar}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-semibold text-gray-900">{review.name}</div>
+                      <div className="text-sm text-gray-500">{review.position}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 lg:py-24 text-white" style={{ background: 'linear-gradient(135deg, #1E3A8A 0%, #22D3EE 100%)' }}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+          <div className="space-y-4">
+            <h2 className="text-3xl lg:text-4xl">
+              Ready to Start Your Journey?
+            </h2>
+            <p className="text-xl text-blue-100">
+              Join our community and experience exceptional workspace solutions today
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              className="text-white border-0 px-8 text-lg h-14 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              style={{ backgroundColor: '#F59E0B' }}
+              onClick={() => setShowSignupModal(true)}
+            >
+              Start Free Trial
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-white/30 text-white hover:bg-white/10 px-8 text-lg h-14 transition-all duration-200"
+            >
+              <Phone className="w-5 h-5 mr-2" />
+              Schedule Consultation
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#22D3EE' }}>
+                  <span className="text-white text-lg">ES</span>
+                </div>
+                <h3 className="text-xl font-semibold">Enosta Space</h3>
+              </div>
+              <p className="text-gray-400">
+                Modern workspace solutions for creative professionals and entrepreneurs.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Services</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>Hot Desk</li>
+                <li>Fixed Desk</li>
+                <li>Private Office</li>
+                <li>Virtual Office</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Support</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>Contact Us</li>
+                <li>FAQ</li>
+                <li>Privacy Policy</li>
+                <li>Terms of Service</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Contact</h4>
+              <div className="space-y-3 text-gray-400">
+                <div className="flex items-center space-x-2">
+                  <Phone className="w-4 h-4" />
+                  <span>+84 987 654 321</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Mail className="w-4 h-4" />
+                  <span>hello@enosta.space</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <MapPin className="w-4 h-4" />
+                  <span>District 1, Ho Chi Minh City</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+            <p>&copy; 2025 Enosta Space. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+
+      {/* Signup Modal */}
+      {showSignupModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-white border border-gray-200 shadow-xl">
+            <CardHeader className="relative">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="absolute right-0 top-0"
+                onClick={() => setShowSignupModal(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+              <div className="text-center space-y-2">
+                <h2 className="text-2xl">Create Your Account</h2>
+                {selectedPlan && (
+                  <Badge className="text-white" style={{ backgroundColor: '#F59E0B' }}>
+                    {selectedPlan}
+                  </Badge>
+                )}
+                <p className="text-gray-600">
+                  Start your amazing coworking experience today
+                </p>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-6">
+              {/* Social Login */}
+              <div className="space-y-3">
+                <Button variant="outline" className="w-full h-12 hover:bg-gray-50 transition-colors">
+                  <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  Continue with Google
+                </Button>
+                
+                <Button variant="outline" className="w-full h-12 hover:bg-gray-50 transition-colors">
+                  <svg className="w-5 h-5 mr-3" fill="#1877F2" viewBox="0 0 24 24">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                  Continue with Facebook
+                </Button>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-3 bg-white text-gray-500 border border-gray-100 rounded">Or sign up with email</span>
+                </div>
+              </div>
+
+              {/* Registration Form */}
+              <form className="space-y-4" onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target as HTMLFormElement);
+                handleSignup({
+                  firstName: formData.get('firstName'),
+                  lastName: formData.get('lastName'),
+                  email: formData.get('email'),
+                  phone: formData.get('phone')
+                });
+              }}>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input 
+                      id="firstName" 
+                      name="firstName"
+                      placeholder="Enter first name" 
+                      className="focus:ring-2 focus:ring-orange-500 transition-all"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input 
+                      id="lastName" 
+                      name="lastName"
+                      placeholder="Enter last name"
+                      className="focus:ring-2 focus:ring-orange-500 transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input 
+                    id="email" 
+                    name="email"
+                    type="email" 
+                    placeholder="example@email.com"
+                    className="focus:ring-2 focus:ring-orange-500 transition-all"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input 
+                    id="phone" 
+                    name="phone"
+                    placeholder="+84 987 654 321"
+                    className="focus:ring-2 focus:ring-orange-500 transition-all"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Input 
+                      id="password" 
+                      type={showPassword ? "text" : "password"} 
+                      placeholder="Create password"
+                      className="pr-10 focus:ring-2 focus:ring-orange-500 transition-all"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Password must be at least 8 characters long
+                  </p>
+                </div>
+
+                {selectedPlan && (
+                  <div className="p-4 rounded-lg border-2 border-orange-200 bg-orange-50">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">Selected Plan: {selectedPlan}</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setSelectedPlan('')}
+                        className="hover:bg-orange-100"
+                      >
+                        Change
+                      </Button>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      VND {plans.find(p => p.name === selectedPlan)?.price} {plans.find(p => p.name === selectedPlan)?.period}
+                    </div>
+                  </div>
+                )}
+                
+                <Button 
+                  type="submit"
+                  className="w-full h-12 text-white hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                  style={{ backgroundColor: '#F59E0B' }}
+                >
+                  Create Account
+                </Button>
+              </form>
+
+              <div className="text-center text-sm text-gray-500">
+                By signing up, you agree to our{' '}
+                <button className="text-blue-600 hover:underline transition-colors">Terms of Service</button>
+                {' '}and{' '}
+                <button className="text-blue-600 hover:underline transition-colors">Privacy Policy</button>
+                .
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
