@@ -1,0 +1,15 @@
+{
+  "name": "react-vite-express-app",
+  "version": "1.0.0",
+  "description": "A full-stack application with React + Vite frontend and Express.js backend",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
