@@ -7,6 +7,9 @@ import { useBooking } from './hooks/useBooking';
 import App from './App';
 import { BookingPage } from './components/booking/BookingPage';
 import { BookingFormPage } from './pages/BookingFormPage';
+import { SeatSelectionPage } from './pages/SeatSelectionPage';
+import { BookingSuccessPage } from './pages/BookingSuccessPage';
+import { MyBookingsPage } from './pages/MyBookingsPage';
 import { WelcomeScreen } from './components/WelcomeScreen';
 
 export default function RouterApp() {
@@ -64,14 +67,19 @@ export default function RouterApp() {
     },
     {
       path: '/booking-form',
-      element: (
-        <BookingFormPage
-          onSubmit={(formData) => {
-            console.log('Booking form submitted:', formData);
-            window.location.href = '/';
-          }}
-        />
-      ),
+      element: <BookingFormPage />
+    },
+    {
+      path: '/booking/seat-selection',
+      element: <SeatSelectionPage />
+    },
+    {
+      path: '/booking-success',
+      element: <BookingSuccessPage />
+    },
+    {
+      path: '/my-bookings',
+      element: <MyBookingsPage />
     },
   ]);
 

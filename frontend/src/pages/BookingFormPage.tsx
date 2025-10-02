@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
@@ -22,6 +23,7 @@ export interface BookingFormData {
 }
 
 export const BookingFormPage = ({ onSubmit }: BookingFormPageProps) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<BookingFormData>({
     name: '',
     email: '',
@@ -44,25 +46,37 @@ export const BookingFormPage = ({ onSubmit }: BookingFormPageProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (onSubmit) {
       onSubmit(formData);
     } else {
-      alert('Booking submitted successfully!');
-      console.log('Form Data:', formData);
+      // Save form data to local storage or session storage for later use
+      sessionStorage.setItem('bookingFormData', JSON.stringify(formData));
+      
+      // Navigate to the seat selection page
+      navigate('/booking/seat-selection');
     }
   };
 
   return (
     <>
-      <Header isAuthenticated={true} userInfo={{firstName: 'User', lastName: '', email: '', phone: '', selectedPlan: '', signupDate: new Date(), planStatus: 'active'}} onLogout={() => {}} />
+      <Header 
+        isAuthenticated={true} 
+        userInfo={{firstName: 'User', lastName: '', email: '', phone: '', selectedPlan: '', signupDate: new Date(), planStatus: 'active'}} 
+        onLogout={() => {}}
+        onGetStarted={() => {}}
+      />
       
       <div className="bg-blue-50 min-h-screen py-10">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
             <h1 className="text-3xl font-bold text-center mb-6">WELCOME TO SWSPACE</h1>
-            <h2 className="text-xl font-semibold text-center mb-8">Modern & Flexible Workspace</h2>
+            <h2 className="text-xl font-semibold text-center mb-4">Modern & Flexible Workspace</h2>
             
-            <h3 className="text-2xl font-bold text-blue-600 text-center mb-8">Book Now</h3>
+            <div className="text-center mb-10">
+              <h3 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-yellow-500 inline-block transform hover:scale-105 transition-transform duration-300">Book Now</h3>
+              <div className="h-1 w-24 bg-yellow-500 mx-auto mt-2 rounded-full"></div>
+            </div>
             
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -181,7 +195,7 @@ export const BookingFormPage = ({ onSubmit }: BookingFormPageProps) => {
               <div className="flex justify-center">
                 <Button 
                   type="submit" 
-                  className="px-10 py-2 rounded-full font-medium"
+                  className="px-12 py-3 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                   style={{ backgroundColor: '#F59E0B' }}
                 >
                   Continue
@@ -191,43 +205,74 @@ export const BookingFormPage = ({ onSubmit }: BookingFormPageProps) => {
           </div>
 
           {/* Testimonials Section */}
-          <div className="max-w-4xl mx-auto mt-20">
-            <h3 className="text-2xl font-bold mb-2">What <span className="text-blue-600">Our Member's</span></h3>
-            <h4 className="text-2xl font-bold mb-6">Saying About Us</h4>
-            
-            <div className="flex justify-between items-center">
-              <div className="flex space-x-2">
-                <p className="text-sm text-gray-500">From experiences shared across SWSpace networks</p>
-              </div>
-              
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4, 5].map((item) => (
-                  <div key={item} className="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center">
-                    <span className="text-xs text-white font-bold">{item}</span>
-                  </div>
-                ))}
-              </div>
+          <div className="max-w-5xl mx-auto mt-20 mb-16">
+            <div className="text-center mb-8">
+              <h3 className="text-3xl font-bold mb-2">What <span className="text-blue-600">Our Members Say</span></h3>
+              <p className="text-gray-600">Real experiences from the SWSpace community</p>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-6 mt-8">
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center mr-4">
-                    <span className="font-bold text-white">JC</span>
+            <div className="grid md:grid-cols-3 gap-8 mt-12">
+              {/* Testimonial 1 */}
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                <div className="flex mb-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-gray-700 italic mb-6">"Amazing workspace! Very quiet and professional environment. My productivity has increased significantly since joining SWSpace."</p>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-pink-200 flex items-center justify-center mr-3">
+                    <span className="font-bold text-pink-800">SC</span>
                   </div>
                   <div>
-                    <p className="font-bold">John Cooper</p>
-                    <p className="text-sm text-gray-500">Graphic Designer</p>
-                  </div>
-                  <div className="ml-auto flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <svg key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
+                    <p className="font-bold">Sarah Chen</p>
+                    <p className="text-sm text-gray-500">UI/UX Designer</p>
                   </div>
                 </div>
-                <p className="text-gray-700">"Working workspace there is just zen and unbelievable experience. The productivity has increased significantly since joining Eworks space."</p>
+              </div>
+              
+              {/* Testimonial 2 */}
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                <div className="flex mb-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-gray-700 italic mb-6">"Excellent support team and full amenities. Super fast WiFi, perfect for coding and online meetings. Highly recommend!"</p>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center mr-3">
+                    <span className="font-bold text-blue-800">MJ</span>
+                  </div>
+                  <div>
+                    <p className="font-bold">Michael Johnson</p>
+                    <p className="text-sm text-gray-500">Software Developer</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Testimonial 3 */}
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                <div className="flex mb-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-gray-700 italic mb-6">"Great value and convenient location. The community here is very friendly - I've made connections and found collaboration opportunities."</p>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-green-200 flex items-center justify-center mr-3">
+                    <span className="font-bold text-green-800">ER</span>
+                  </div>
+                  <div>
+                    <p className="font-bold">Emily Rodriguez</p>
+                    <p className="text-sm text-gray-500">Marketing Manager</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

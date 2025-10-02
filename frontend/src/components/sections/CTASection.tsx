@@ -9,7 +9,7 @@ interface CTASectionProps {
 
 export const CTASection = ({ isAuthenticated, onGetStarted, onBookSpace }: CTASectionProps) => {
   return (
-    <section className="py-16 lg:py-24 text-white" style={{ background: 'linear-gradient(135deg, #1E3A8A 0%, #22D3EE 100%)' }}>
+    <section id="contact-section" className="py-16 lg:py-24 text-white" style={{ background: 'linear-gradient(135deg, #1E3A8A 0%, #22D3EE 100%)' }}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
         <div className="space-y-4">
           <h2 className="text-3xl lg:text-4xl">

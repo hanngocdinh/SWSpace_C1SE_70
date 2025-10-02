@@ -2,6 +2,7 @@ import { Button } from '../ui/button';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Bell, LogOut } from 'lucide-react';
 import { UserInfo } from '../../types';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   isAuthenticated: boolean;
@@ -12,6 +13,15 @@ interface HeaderProps {
 }
 
 export const Header = ({ isAuthenticated, userInfo, onGetStarted, onLogout, onLogin }: HeaderProps) => {
+  const navigate = useNavigate();
+  
+  // Scroll to section function
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   return (
     <header className="bg-white/95 backdrop-blur-sm shadow-sm border-b sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,21 +36,30 @@ export const Header = ({ isAuthenticated, userInfo, onGetStarted, onLogout, onLo
           
           {/* Navigation Menu */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#home" className="text-gray-700 hover:text-blue-600 transition-colors border-b-2 border-blue-600 pb-1">
+            <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors border-b-2 border-blue-600 pb-1">
               Home
-            </a>
-            <a href="#about" className="text-gray-700 hover:text-blue-600 transition-colors">
+            </Link>
+            <button 
+              onClick={() => scrollToSection('benefits-section')}
+              className="text-gray-700 hover:text-blue-600 transition-colors"
+            >
               About
-            </a>
-            <a href="#package" className="text-gray-700 hover:text-blue-600 transition-colors">
+            </button>
+            <button 
+              onClick={() => scrollToSection('pricing-section')}
+              className="text-gray-700 hover:text-blue-600 transition-colors"
+            >
               Package
-            </a>
-            <a href="#booking" className="text-gray-700 hover:text-blue-600 transition-colors">
+            </button>
+            <Link to="/booking-form" className="text-gray-700 hover:text-blue-600 transition-colors">
               Booking
-            </a>
-            <a href="#contact" className="text-gray-700 hover:text-blue-600 transition-colors">
+            </Link>
+            <button 
+              onClick={() => scrollToSection('contact-section')}
+              className="text-gray-700 hover:text-blue-600 transition-colors"
+            >
               Contact
-            </a>
+            </button>
           </nav>
           
           {/* Right Side Actions */}
